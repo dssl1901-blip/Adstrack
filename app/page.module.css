@@ -8,38 +8,12 @@
   margin-bottom: 40px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pulseDot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--violet-bright);
-  box-shadow: 0 0 0 0 rgba(183, 148, 255, 0.6);
-  animation: pulse 2.4s ease-out infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(183, 148, 255, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(183, 148, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(183, 148, 255, 0);
-  }
-}
-
-.brandName {
+.pageTitle {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 22px;
   letter-spacing: -0.01em;
+  margin: 0;
 }
 
 .tagline {
