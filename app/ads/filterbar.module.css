@@ -1,0 +1,118 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.filter {
+  position: relative;
+}
+
+.filter summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: var(--panel-raised);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--mono);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.filter summary::-webkit-details-marker {
+  display: none;
+}
+
+.filter[open] summary {
+  color: var(--ink);
+  border-color: var(--violet);
+}
+
+.chevron {
+  margin-left: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  background: var(--panel-raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  min-width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.panelWide {
+  min-width: 220px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.radioRow,
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  color: var(--mono);
+  padding: 6px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.radioRow:hover,
+.checkRow:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 6px;
+}
+
+.fieldRow input {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-family: var(--font-body);
+}
+
+.fieldRow input:focus {
+  border-color: var(--violet);
+  outline: none;
+}

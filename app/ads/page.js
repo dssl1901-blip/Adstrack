@@ -2,8 +2,19 @@
 
 import { useState } from 'react';
 import styles from './page.module.css';
+import FilterBar from './FilterBar';
 
-const EU_COUNTRIES = ['FR', 'DE', 'ES', 'IT', 'BE', 'NL', 'PT', 'PL', 'SE', 'IE'];
+const DEFAULT_COUNTRIES = ['FR', 'DE', 'ES', 'IT', 'BE', 'NL', 'PT', 'PL', 'SE', 'IE'];
+
+const DEFAULT_FILTERS = {
+  status: 'ACTIVE',
+  countries: DEFAULT_COUNTRIES,
+  mediaType: 'ALL',
+  platforms: [],
+  dateMin: '',
+  dateMax: '',
+  minDaysActive: '',
+};
 
 function daysLive(startDate) {
   if (!startDate) return null;
@@ -19,8 +30,9 @@ function spendMidpoint(spend) {
   return (lower + upper) / 2;
 }
 
-export default function Home() {
+export default function Ads() {
   const [keyword, setKeyword] = useState('');
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -33,15 +45,31 @@ export default function Home() {
     setError(null);
     setSearched(true);
     try {
-      const res = await fetch(
-        `/api/search?keyword=${encodeURIComponent(keyword)}`
-      );
+      const params = new URLSearchParams({
+        keyword,
+        status: filters.status,
+        countries: filters.countries.join(','),
+        mediaType: filters.mediaType,
+      });
+      if (filters.platforms.length) params.set('platforms', filters.platforms.join(','));
+      if (filters.dateMin) params.set('dateMin', filters.dateMin);
+      if (filters.dateMax) params.set('dateMax', filters.dateMax);
+
+      const res = await fetch(`/api/search?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur inconnue');
 
-      const sorted = (data.results || []).sort(
-        (a, b) => spendMidpoint(b.spend) - spendMidpoint(a.spend)
-      );
+      let list = data.results || [];
+
+      const minDays = Number(filters.minDaysActive);
+      if (minDays > 0) {
+        list = list.filter((ad) => {
+          const live = daysLive(ad.ad_delivery_start_time);
+          return live !== null && live >= minDays;
+        });
+      }
+
+      const sorted = list.sort((a, b) => spendMidpoint(b.spend) - spendMidpoint(a.spend));
       setResults(sorted);
     } catch (err) {
       setError(err.message);
@@ -75,15 +103,13 @@ export default function Home() {
         </button>
       </form>
 
-      {error && (
-        <div className={styles.error}>
-          Le scan a échoué : {error}
-        </div>
-      )}
+      <FilterBar filters={filters} onChange={setFilters} />
+
+      {error && <div className={styles.error}>Le scan a échoué : {error}</div>}
 
       {!loading && searched && !error && results.length === 0 && (
         <div className={styles.empty}>
-          Aucun signal détecté pour « {keyword} ». Essaie un terme plus large ou plus générique.
+          Aucun signal détecté pour « {keyword} » avec ces filtres. Essaie un terme plus large ou élargis les filtres.
         </div>
       )}
 
@@ -94,17 +120,11 @@ export default function Home() {
           const live = daysLive(ad.ad_delivery_start_time);
           return (
             <li key={ad.id || i} className={styles.card}>
-              <div
-                className={styles.signal}
-                style={{ opacity: intensity }}
-                aria-hidden="true"
-              />
+              <div className={styles.signal} style={{ opacity: intensity }} aria-hidden="true" />
               <div className={styles.cardBody}>
                 <div className={styles.cardTop}>
                   <span className={styles.pageName}>{ad.page_name || 'Annonceur inconnu'}</span>
-                  {live !== null && (
-                    <span className={styles.liveBadge}>{live} j en diffusion</span>
-                  )}
+                  {live !== null && <span className={styles.liveBadge}>{live} j en diffusion</span>}
                 </div>
 
                 <p className={styles.adText}>
@@ -130,12 +150,7 @@ export default function Home() {
                     </strong>
                   </span>
                   {ad.ad_snapshot_url && (
-                    <a
-                      className={styles.link}
-                      href={ad.ad_snapshot_url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
+                    <a className={styles.link} href={ad.ad_snapshot_url} target="_blank" rel="noreferrer">
                       Voir la pub ↗
                     </a>
                   )}
