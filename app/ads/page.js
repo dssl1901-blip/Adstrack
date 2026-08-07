@@ -14,7 +14,55 @@ const DEFAULT_FILTERS = {
   dateMin: '',
   dateMax: '',
   minDaysActive: '',
+  cpmMax: '',
+  reachMin: '',
+  spendMin: '',
+  gender: 'ALL',
+  ageRange: 'ALL',
 };
+
+function impressionsMidpoint(impressions) {
+  if (!impressions || !impressions.lower_bound) return 0;
+  const lower = Number(impressions.lower_bound) || 0;
+  const upper = Number(impressions.upper_bound) || lower;
+  return (lower + upper) / 2;
+}
+
+function estimatedCpm(ad) {
+  const spend = spendMidpointStandalone(ad.spend);
+  const impressions = impressionsMidpoint(ad.impressions);
+  if (!spend || !impressions) return null;
+  return (spend / impressions) * 1000;
+}
+
+function spendMidpointStandalone(spend) {
+  if (!spend || !spend.lower_bound) return 0;
+  const lower = Number(spend.lower_bound) || 0;
+  const upper = Number(spend.upper_bound) || lower;
+  return (lower + upper) / 2;
+}
+
+function genderMatches(ad, gender) {
+  if (gender === 'ALL') return true;
+  const breakdown = ad.age_country_gender_reach_breakdown;
+  if (!breakdown) return false;
+  return breakdown.some((entry) =>
+    (entry.age_gender_breakdowns || []).some(
+      (g) => g.gender === gender && Number(g.reach) > 0
+    )
+  );
+}
+
+function ageMatches(ad, ageRange) {
+  if (ageRange === 'ALL') return true;
+  const breakdown = ad.age_country_gender_reach_breakdown;
+  if (!breakdown) return false;
+  return breakdown.some((entry) =>
+    (entry.age_gender_breakdowns || []).some(
+      (g) => g.age_range === ageRange && Number(g.reach) > 0
+    )
+  );
+}
 
 function daysLive(startDate) {
   if (!startDate) return null;
@@ -67,6 +115,32 @@ export default function Ads() {
           const live = daysLive(ad.ad_delivery_start_time);
           return live !== null && live >= minDays;
         });
+      }
+
+      const cpmMax = Number(filters.cpmMax);
+      if (cpmMax > 0) {
+        list = list.filter((ad) => {
+          const cpm = estimatedCpm(ad);
+          return cpm !== null && cpm <= cpmMax;
+        });
+      }
+
+      const reachMin = Number(filters.reachMin);
+      if (reachMin > 0) {
+        list = list.filter((ad) => Number(ad.eu_total_reach) >= reachMin);
+      }
+
+      const spendMin = Number(filters.spendMin);
+      if (spendMin > 0) {
+        list = list.filter((ad) => spendMidpoint(ad.spend) >= spendMin);
+      }
+
+      if (filters.gender !== 'ALL') {
+        list = list.filter((ad) => genderMatches(ad, filters.gender));
+      }
+
+      if (filters.ageRange !== 'ALL') {
+        list = list.filter((ad) => ageMatches(ad, filters.ageRange));
       }
 
       const sorted = list.sort((a, b) => spendMidpoint(b.spend) - spendMidpoint(a.spend));

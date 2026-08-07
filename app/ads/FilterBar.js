@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import styles from './filterbar.module.css';
 
 const COUNTRIES = [
@@ -14,6 +15,16 @@ const COUNTRIES = [
   { code: 'SE', label: 'Suède' },
   { code: 'IE', label: 'Irlande' },
   { code: 'GB', label: 'Royaume-Uni' },
+];
+
+const AGE_RANGES = [
+  ['13-17', '13–17 ans'],
+  ['18-24', '18–24 ans'],
+  ['25-34', '25–34 ans'],
+  ['35-44', '35–44 ans'],
+  ['45-54', '45–54 ans'],
+  ['55-64', '55–64 ans'],
+  ['65+', '65 ans et +'],
 ];
 
 const ICONS = {
@@ -55,9 +66,41 @@ const ICONS = {
       <path d="M12 9v4l2.5 2M9.5 2.5h5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  cpm: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9 15.5V8.5M9 8.5h3.2a2 2 0 1 1 0 4H9M15 8.5v7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  reach: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="2.4" />
+      <path d="M7.5 7.5a6.5 6.5 0 0 0 0 9M16.5 7.5a6.5 6.5 0 0 1 0 9" strokeLinecap="round" />
+    </svg>
+  ),
+  spend: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 15h3a1.7 1.7 0 0 0 0-3.4h-1a1.7 1.7 0 0 1 0-3.4h3M12 7.2v1M12 15.6v1.2" strokeLinecap="round" />
+    </svg>
+  ),
+  gender: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="9" cy="14" r="5" />
+      <path d="M17 3l3 0 0 3M20 3l-5.5 5.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  age: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5.5 20c1-3.6 3.6-5.6 6.5-5.6s5.5 2 6.5 5.6" strokeLinecap="round" />
+    </svg>
+  ),
 };
 
 export default function FilterBar({ filters, onChange }) {
+  const [tab, setTab] = useState('ads');
+
   function set(patch) {
     onChange({ ...filters, ...patch });
   }
@@ -79,8 +122,27 @@ export default function FilterBar({ filters, onChange }) {
   }
 
   return (
-    <div className={styles.bar}>
-      <span className={styles.label}>Filtrer par :</span>
+    <div className={styles.wrapper}>
+      <div className={styles.tabs}>
+        <span className={styles.label}>Filtrer par :</span>
+        <button
+          type="button"
+          className={`${styles.tab} ${tab === 'ads' ? styles.tabActive : ''}`}
+          onClick={() => setTab('ads')}
+        >
+          Ads
+        </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${tab === 'reach' ? styles.tabActive : ''}`}
+          onClick={() => setTab('reach')}
+        >
+          Portée &amp; dépenses
+        </button>
+      </div>
+
+      {tab === 'ads' && (
+        <div className={styles.bar}>
 
       <details className={styles.filter}>
         <summary>
@@ -220,6 +282,130 @@ export default function FilterBar({ filters, onChange }) {
           </label>
         </div>
       </details>
+        </div>
+      )}
+
+      {tab === 'reach' && (
+        <div className={styles.bar}>
+          <details className={styles.filter}>
+            <summary>
+              {ICONS.cpm}
+              CPM max (estimé)
+              <span className={styles.chevron}>⌄</span>
+            </summary>
+            <div className={styles.panel}>
+              <label className={styles.fieldRow}>
+                CPM max (€)
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 15"
+                  value={filters.cpmMax}
+                  onChange={(e) => set({ cpmMax: e.target.value })}
+                />
+              </label>
+              <p className={styles.hint}>Estimé à partir du spend et des impressions.</p>
+            </div>
+          </details>
+
+          <details className={styles.filter}>
+            <summary>
+              {ICONS.reach}
+              Portée Ad min
+              <span className={styles.chevron}>⌄</span>
+            </summary>
+            <div className={styles.panel}>
+              <label className={styles.fieldRow}>
+                Portée minimum
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 50000"
+                  value={filters.reachMin}
+                  onChange={(e) => set({ reachMin: e.target.value })}
+                />
+              </label>
+              <p className={styles.hint}>Portée UE réelle, disponible uniquement si Meta la fournit pour la pub.</p>
+            </div>
+          </details>
+
+          <details className={styles.filter}>
+            <summary>
+              {ICONS.spend}
+              Dépenses Ad min
+              <span className={styles.chevron}>⌄</span>
+            </summary>
+            <div className={styles.panel}>
+              <label className={styles.fieldRow}>
+                Spend minimum (€)
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 1000"
+                  value={filters.spendMin}
+                  onChange={(e) => set({ spendMin: e.target.value })}
+                />
+              </label>
+            </div>
+          </details>
+
+          <details className={styles.filter}>
+            <summary>
+              {ICONS.gender}
+              Genre
+              <span className={styles.chevron}>⌄</span>
+            </summary>
+            <div className={styles.panel}>
+              {[
+                ['ALL', 'Tous'],
+                ['female', 'Femme'],
+                ['male', 'Homme'],
+                ['unknown', 'Non précisé'],
+              ].map(([value, label]) => (
+                <label key={value} className={styles.radioRow}>
+                  <input
+                    type="radio"
+                    name="gender"
+                    checked={filters.gender === value}
+                    onChange={() => set({ gender: value })}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </details>
+
+          <details className={styles.filter}>
+            <summary>
+              {ICONS.age}
+              Âge
+              <span className={styles.chevron}>⌄</span>
+            </summary>
+            <div className={`${styles.panel} ${styles.panelWide}`}>
+              <label className={styles.checkRow}>
+                <input
+                  type="radio"
+                  name="age"
+                  checked={filters.ageRange === 'ALL'}
+                  onChange={() => set({ ageRange: 'ALL' })}
+                />
+                Tous
+              </label>
+              {AGE_RANGES.map(([value, label]) => (
+                <label key={value} className={styles.checkRow}>
+                  <input
+                    type="radio"
+                    name="age"
+                    checked={filters.ageRange === value}
+                    onChange={() => set({ ageRange: value })}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
     </div>
   );
 }

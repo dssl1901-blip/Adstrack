@@ -1,3 +1,41 @@
+.wrapper {
+  margin-bottom: 28px;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 2px 10px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 6px 4px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tabActive {
+  color: var(--violet-bright);
+  border-bottom-color: var(--violet-bright);
+}
+
 .bar {
   display: flex;
   flex-wrap: wrap;
@@ -7,15 +45,7 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px 14px;
-  margin-bottom: 28px;
   position: relative;
-}
-
-.label {
-  font-size: 13px;
-  color: var(--muted);
-  margin-right: 4px;
-  white-space: nowrap;
 }
 
 .filter {
@@ -115,4 +145,13 @@
 .fieldRow input:focus {
   border-color: var(--violet);
   outline: none;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px 6px 2px;
+  margin: 0;
+  max-width: 190px;
+  line-height: 1.4;
 }

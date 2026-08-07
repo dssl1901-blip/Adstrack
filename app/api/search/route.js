@@ -11,6 +11,8 @@ const FIELDS = [
   'impressions',
   'currency',
   'publisher_platforms',
+  'eu_total_reach',
+  'age_country_gender_reach_breakdown',
 ].join(',');
 
 export async function GET(request) {
