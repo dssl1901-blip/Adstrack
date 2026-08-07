@@ -1,4 +1,5 @@
 import './globals.css';
+import Sidebar from './Sidebar';
 
 export const metadata = {
   title: 'AdScout — Product Radar',
@@ -16,7 +17,12 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <div style={{ display: 'flex' }}>
+          <Sidebar active="home" />
+          <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+        </div>
+      </body>
     </html>
   );
 }
