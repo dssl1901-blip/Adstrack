@@ -155,3 +155,12 @@
   max-width: 190px;
   line-height: 1.4;
 }
+
+.sectionNote {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  padding: 6px 4px;
+  line-height: 1.5;
+  max-width: 60ch;
+}

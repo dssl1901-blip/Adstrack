@@ -139,6 +139,13 @@ export default function FilterBar({ filters, onChange }) {
         >
           Portée &amp; dépenses
         </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${tab === 'page' ? styles.tabActive : ''}`}
+          onClick={() => setTab('page')}
+        >
+          Page
+        </button>
       </div>
 
       {tab === 'ads' && (
@@ -280,6 +287,16 @@ export default function FilterBar({ filters, onChange }) {
               onChange={(e) => set({ minDaysActive: e.target.value })}
             />
           </label>
+          <label className={styles.fieldRow}>
+            Maximum (jours)
+            <input
+              type="number"
+              min="0"
+              placeholder="ex : 90"
+              value={filters.maxDaysActive}
+              onChange={(e) => set({ maxDaysActive: e.target.value })}
+            />
+          </label>
         </div>
       </details>
         </div>
@@ -290,10 +307,20 @@ export default function FilterBar({ filters, onChange }) {
           <details className={styles.filter}>
             <summary>
               {ICONS.cpm}
-              CPM max (estimé)
+              CPM (estimé)
               <span className={styles.chevron}>⌄</span>
             </summary>
             <div className={styles.panel}>
+              <label className={styles.fieldRow}>
+                CPM min (€)
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 2"
+                  value={filters.cpmMin}
+                  onChange={(e) => set({ cpmMin: e.target.value })}
+                />
+              </label>
               <label className={styles.fieldRow}>
                 CPM max (€)
                 <input
@@ -311,7 +338,7 @@ export default function FilterBar({ filters, onChange }) {
           <details className={styles.filter}>
             <summary>
               {ICONS.reach}
-              Portée Ad min
+              Portée Ad
               <span className={styles.chevron}>⌄</span>
             </summary>
             <div className={styles.panel}>
@@ -325,6 +352,16 @@ export default function FilterBar({ filters, onChange }) {
                   onChange={(e) => set({ reachMin: e.target.value })}
                 />
               </label>
+              <label className={styles.fieldRow}>
+                Portée maximum
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 500000"
+                  value={filters.reachMax}
+                  onChange={(e) => set({ reachMax: e.target.value })}
+                />
+              </label>
               <p className={styles.hint}>Portée UE réelle, disponible uniquement si Meta la fournit pour la pub.</p>
             </div>
           </details>
@@ -332,7 +369,7 @@ export default function FilterBar({ filters, onChange }) {
           <details className={styles.filter}>
             <summary>
               {ICONS.spend}
-              Dépenses Ad min
+              Dépenses Ad
               <span className={styles.chevron}>⌄</span>
             </summary>
             <div className={styles.panel}>
@@ -344,6 +381,16 @@ export default function FilterBar({ filters, onChange }) {
                   placeholder="ex : 1000"
                   value={filters.spendMin}
                   onChange={(e) => set({ spendMin: e.target.value })}
+                />
+              </label>
+              <label className={styles.fieldRow}>
+                Spend maximum (€)
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 20000"
+                  value={filters.spendMax}
+                  onChange={(e) => set({ spendMax: e.target.value })}
                 />
               </label>
             </div>
@@ -404,6 +451,47 @@ export default function FilterBar({ filters, onChange }) {
               ))}
             </div>
           </details>
+        </div>
+      )}
+
+      {tab === 'page' && (
+        <div className={styles.bar}>
+          <details className={styles.filter}>
+            <summary>
+              {ICONS.reach}
+              Ads actives (annonceur)
+              <span className={styles.chevron}>⌄</span>
+            </summary>
+            <div className={styles.panel}>
+              <label className={styles.fieldRow}>
+                Minimum
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 2"
+                  value={filters.activeAdsMin}
+                  onChange={(e) => set({ activeAdsMin: e.target.value })}
+                />
+              </label>
+              <label className={styles.fieldRow}>
+                Maximum
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="ex : 10"
+                  value={filters.activeAdsMax}
+                  onChange={(e) => set({ activeAdsMax: e.target.value })}
+                />
+              </label>
+              <p className={styles.hint}>
+                Compté parmi les résultats de ta recherche actuelle, pas sur l&rsquo;ensemble des pubs de la page.
+              </p>
+            </div>
+          </details>
+          <p className={styles.sectionNote}>
+            Date de création de page, croissance des ads, abonnés et pubs de partenariat ne sont pas fournis par
+            l&rsquo;Ad Library API — pas de filtre fiable possible pour l&rsquo;instant.
+          </p>
         </div>
       )}
     </div>

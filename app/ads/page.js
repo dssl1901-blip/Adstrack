@@ -14,11 +14,17 @@ const DEFAULT_FILTERS = {
   dateMin: '',
   dateMax: '',
   minDaysActive: '',
+  maxDaysActive: '',
+  cpmMin: '',
   cpmMax: '',
   reachMin: '',
+  reachMax: '',
   spendMin: '',
+  spendMax: '',
   gender: 'ALL',
   ageRange: 'ALL',
+  activeAdsMin: '',
+  activeAdsMax: '',
 };
 
 function impressionsMidpoint(impressions) {
@@ -116,7 +122,21 @@ export default function Ads() {
           return live !== null && live >= minDays;
         });
       }
+      const maxDays = Number(filters.maxDaysActive);
+      if (maxDays > 0) {
+        list = list.filter((ad) => {
+          const live = daysLive(ad.ad_delivery_start_time);
+          return live !== null && live <= maxDays;
+        });
+      }
 
+      const cpmMin = Number(filters.cpmMin);
+      if (cpmMin > 0) {
+        list = list.filter((ad) => {
+          const cpm = estimatedCpm(ad);
+          return cpm !== null && cpm >= cpmMin;
+        });
+      }
       const cpmMax = Number(filters.cpmMax);
       if (cpmMax > 0) {
         list = list.filter((ad) => {
@@ -129,10 +149,18 @@ export default function Ads() {
       if (reachMin > 0) {
         list = list.filter((ad) => Number(ad.eu_total_reach) >= reachMin);
       }
+      const reachMax = Number(filters.reachMax);
+      if (reachMax > 0) {
+        list = list.filter((ad) => Number(ad.eu_total_reach) <= reachMax);
+      }
 
       const spendMin = Number(filters.spendMin);
       if (spendMin > 0) {
         list = list.filter((ad) => spendMidpoint(ad.spend) >= spendMin);
+      }
+      const spendMax = Number(filters.spendMax);
+      if (spendMax > 0) {
+        list = list.filter((ad) => spendMidpoint(ad.spend) <= spendMax);
       }
 
       if (filters.gender !== 'ALL') {
@@ -141,6 +169,22 @@ export default function Ads() {
 
       if (filters.ageRange !== 'ALL') {
         list = list.filter((ad) => ageMatches(ad, filters.ageRange));
+      }
+
+      const activeAdsMin = Number(filters.activeAdsMin);
+      const activeAdsMax = Number(filters.activeAdsMax);
+      if (activeAdsMin > 0 || activeAdsMax > 0) {
+        const counts = {};
+        list.forEach((ad) => {
+          const key = ad.page_name || '—';
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        list = list.filter((ad) => {
+          const count = counts[ad.page_name || '—'];
+          if (activeAdsMin > 0 && count < activeAdsMin) return false;
+          if (activeAdsMax > 0 && count > activeAdsMax) return false;
+          return true;
+        });
       }
 
       const sorted = list.sort((a, b) => spendMidpoint(b.spend) - spendMidpoint(a.spend));
