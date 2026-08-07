@@ -91,24 +91,32 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
 }
 
 .card {
-  position: relative;
   display: flex;
+  flex-direction: column;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
 }
 
-.signal {
-  width: 4px;
-  flex-shrink: 0;
-  background: linear-gradient(180deg, var(--violet-bright), var(--violet-deep));
+.previewWrap {
+  width: 100%;
+  height: 280px;
+  background: #050506;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.preview {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 .cardBody {
@@ -156,9 +164,11 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 18px;
+  gap: 10px;
+  row-gap: 6px;
   border-top: 1px solid var(--line);
   padding-top: 12px;
+  margin-top: auto;
 }
 
 .metric {

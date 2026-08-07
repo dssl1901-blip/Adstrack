@@ -26,12 +26,25 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    key: 'watchlist',
+    label: 'Watchlist',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 17.3 6.2 20.5l1.1-6.5-4.7-4.6 6.5-.9L12 2.8l2.9 5.7 6.5.9-4.7 4.6 1.1 6.5Z" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-  const active = pathname?.startsWith('/ads') ? 'ads' : 'home';
+  const active = pathname?.startsWith('/watchlist')
+    ? 'watchlist'
+    : pathname?.startsWith('/ads')
+    ? 'ads'
+    : 'home';
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>

@@ -234,11 +234,20 @@ export default function Ads() {
       <ul className={styles.results}>
         {results.map((ad, i) => {
           const spend = spendMidpoint(ad.spend);
-          const intensity = Math.max(0.08, spend / maxSpend);
           const live = daysLive(ad.ad_delivery_start_time);
           return (
             <li key={ad.id || i} className={styles.card}>
-              <div className={styles.signal} style={{ opacity: intensity }} aria-hidden="true" />
+              {ad.ad_snapshot_url && (
+                <div className={styles.previewWrap}>
+                  <iframe
+                    className={styles.preview}
+                    src={ad.ad_snapshot_url}
+                    loading="lazy"
+                    sandbox="allow-scripts allow-same-origin"
+                    title={`Aperçu pub ${ad.page_name || ad.id}`}
+                  />
+                </div>
+              )}
               <div className={styles.cardBody}>
                 <div className={styles.cardTop}>
                   <span className={styles.pageName}>{ad.page_name || 'Annonceur inconnu'}</span>
