@@ -1,0 +1,58 @@
+:root {
+  --void: #09090c;
+  --panel: #121017;
+  --panel-raised: #17141f;
+  --line: #26212f;
+  --violet: #8b5cf6;
+  --violet-bright: #b794ff;
+  --violet-deep: #34146b;
+  --ink: #ece9f4;
+  --muted: #85808f;
+  --mono: #c9c4d6;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(139, 92, 246, 0.16), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(52, 20, 107, 0.35), transparent 55%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--violet-bright);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
