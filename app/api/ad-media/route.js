@@ -1,28 +1,22 @@
 import { NextResponse } from 'next/server';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 
-function extractMeta(html, property) {
-  const re1 = new RegExp(
-    `<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["']`,
-    'i'
-  );
-  let match = html.match(re1);
-  if (match) return decodeEntities(match[1]);
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
-  const re2 = new RegExp(
-    `<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${property}["']`,
-    'i'
-  );
-  match = html.match(re2);
-  return match ? decodeEntities(match[1]) : null;
-}
+let browserPromise = null;
 
-function decodeEntities(str) {
-  return str
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
+async function getBrowser() {
+  if (!browserPromise) {
+    browserPromise = puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: { width: 800, height: 1000 },
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+  }
+  return browserPromise;
 }
 
 export async function GET(request) {
@@ -33,21 +27,51 @@ export async function GET(request) {
     return NextResponse.json({ error: 'URL de snapshot invalide' }, { status: 400 });
   }
 
+  let page;
   try {
-    const res = await fetch(snapshotUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AdScoutBot/1.0)' },
+    const browser = await getBrowser();
+    page = await browser.newPage();
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+    );
+
+    await page.goto(snapshotUrl, { waitUntil: 'networkidle2', timeout: 25000 });
+
+    await page
+      .waitForSelector('video, img[src*="scontent"]', { timeout: 8000 })
+      .catch(() => {});
+
+    const media = await page.evaluate(() => {
+      const video = document.querySelector('video');
+      if (video && video.src) {
+        return { type: 'video', url: video.src, poster: video.poster || null };
+      }
+
+      const imgs = Array.from(document.querySelectorAll('img'))
+        .filter((img) => img.src && img.naturalWidth > 120 && img.naturalHeight > 120)
+        .sort((a, b) => b.naturalWidth * b.naturalHeight - a.naturalWidth * a.naturalHeight);
+
+      if (imgs.length) {
+        return { type: 'image', url: imgs[0].src };
+      }
+      return null;
     });
-    const html = await res.text();
 
-    const image = extractMeta(html, 'og:image');
-    const video = extractMeta(html, 'og:video:secure_url') || extractMeta(html, 'og:video');
+    await page.close();
 
-    if (!image && !video) {
-      return NextResponse.json({ error: 'Aucun média trouvé sur cette pub' }, { status: 404 });
+    if (!media) {
+      return NextResponse.json({ error: 'Aucun média détecté sur cette pub' }, { status: 404 });
     }
 
-    return NextResponse.json({ image, video });
+    if (media.type === 'video') {
+      return NextResponse.json({ video: media.url, image: media.poster });
+    }
+    return NextResponse.json({ image: media.url });
   } catch (err) {
-    return NextResponse.json({ error: 'Impossible de récupérer le média' }, { status: 502 });
+    if (page) await page.close().catch(() => {});
+    return NextResponse.json(
+      { error: `Rendu échoué : ${err.message || 'erreur inconnue'}` },
+      { status: 502 }
+    );
   }
 }
