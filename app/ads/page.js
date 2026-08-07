@@ -238,15 +238,18 @@ export default function Ads() {
           return (
             <li key={ad.id || i} className={styles.card}>
               {ad.ad_snapshot_url && (
-                <div className={styles.previewWrap}>
-                  <iframe
-                    className={styles.preview}
-                    src={ad.ad_snapshot_url}
-                    loading="lazy"
-                    sandbox="allow-scripts allow-same-origin"
-                    title={`Aperçu pub ${ad.page_name || ad.id}`}
-                  />
-                </div>
+                <a
+                  className={styles.previewWrap}
+                  href={ad.ad_snapshot_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                    <rect x="3.5" y="5" width="17" height="14" rx="2" />
+                    <path d="m9.5 9.5 6 3-6 3v-6Z" strokeLinejoin="round" />
+                  </svg>
+                  <span>Voir l&rsquo;aperçu Meta</span>
+                </a>
               )}
               <div className={styles.cardBody}>
                 <div className={styles.cardTop}>
@@ -276,11 +279,6 @@ export default function Ads() {
                         : 'n/a'}
                     </strong>
                   </span>
-                  {ad.ad_snapshot_url && (
-                    <a className={styles.link} href={ad.ad_snapshot_url} target="_blank" rel="noreferrer">
-                      Voir la pub ↗
-                    </a>
-                  )}
                 </div>
               </div>
             </li>
