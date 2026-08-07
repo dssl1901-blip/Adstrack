@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import FilterBar from './FilterBar';
+import AdPreview from './AdPreview';
 
 const DEFAULT_COUNTRIES = ['FR', 'DE', 'ES', 'IT', 'BE', 'NL', 'PT', 'PL', 'SE', 'IE'];
 
@@ -237,20 +238,7 @@ export default function Ads() {
           const live = daysLive(ad.ad_delivery_start_time);
           return (
             <li key={ad.id || i} className={styles.card}>
-              {ad.ad_snapshot_url && (
-                <a
-                  className={styles.previewWrap}
-                  href={ad.ad_snapshot_url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                    <rect x="3.5" y="5" width="17" height="14" rx="2" />
-                    <path d="m9.5 9.5 6 3-6 3v-6Z" strokeLinejoin="round" />
-                  </svg>
-                  <span>Voir l&rsquo;aperçu Meta</span>
-                </a>
-              )}
+              <AdPreview ad={ad} />
               <div className={styles.cardBody}>
                 <div className={styles.cardTop}>
                   <span className={styles.pageName}>{ad.page_name || 'Annonceur inconnu'}</span>
