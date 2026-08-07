@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <div style={{ display: 'flex' }}>
-          <Sidebar active="home" />
+          <Sidebar />
           <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
         </div>
       </body>

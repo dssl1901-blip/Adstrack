@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import styles from './sidebar.module.css';
 
 const NAV_ITEMS = [
@@ -27,8 +28,10 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function Sidebar({ active = 'home' }) {
+export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
+  const active = pathname?.startsWith('/ads') ? 'ads' : 'home';
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
