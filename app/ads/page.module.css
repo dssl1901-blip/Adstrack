@@ -1,7 +1,7 @@
 .main {
-  max-width: 780px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 64px 24px 96px;
+  padding: 64px 32px 96px;
 }
 
 .header {
@@ -92,42 +92,67 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 14px;
+}
+
+@media (max-width: 1400px) {
+  .results {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .results {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: #f5f5f7;
+  border: 1px solid #e3e2e8;
   border-radius: 12px;
   overflow: hidden;
+  color: #17151d;
 }
 
 .previewWrap {
   width: 100%;
-  height: 200px;
-  background: var(--panel-raised);
-  border-bottom: 1px solid var(--line);
+  height: 170px;
+  background: #e9e8ee;
+  border-bottom: 1px solid #e3e2e8;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: var(--muted);
+  color: #8b8894;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .previewWrap:hover {
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--violet-bright);
+  background: #ded9f5;
+  color: #6d28d9;
 }
 
 .previewLoading {
-  background: linear-gradient(90deg, var(--panel-raised) 25%, var(--panel) 50%, var(--panel-raised) 75%);
+  background: linear-gradient(90deg, #e9e8ee 25%, #f5f5f7 50%, #e9e8ee 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
@@ -143,9 +168,9 @@
 
 .mediaWrap {
   width: 100%;
-  height: 200px;
+  height: 170px;
   background: #050506;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #e3e2e8;
   overflow: hidden;
 }
 
@@ -157,77 +182,95 @@
 }
 
 .cardBody {
-  padding: 18px 20px;
+  padding: 12px 14px 14px;
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .pageName {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 15px;
+  font-size: 13.5px;
+  color: #17151d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .liveBadge {
   font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--violet-bright);
-  background: rgba(139, 92, 246, 0.12);
+  font-size: 11px;
+  color: #6d28d9;
+  background: rgba(124, 58, 237, 0.1);
   border-radius: 6px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .adText {
-  color: var(--mono);
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0 0 14px;
+  color: #4a4852;
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin: 0 0 12px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.cardFoot {
+.cardActions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  row-gap: 6px;
-  border-top: 1px solid var(--line);
-  padding-top: 12px;
+  gap: 8px;
+  border-top: 1px solid #e3e2e8;
+  padding-top: 10px;
   margin-top: auto;
 }
 
-.metric {
-  font-family: var(--font-mono);
+.detailsBtn {
+  flex: 1;
+  background: #17151d;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 0;
   font-size: 12.5px;
-  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.metric strong {
-  color: var(--ink);
-  font-weight: 500;
+.detailsBtn:hover {
+  background: #322c3d;
 }
 
-.link {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--violet-bright);
+.originalLink {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e3e2e8;
+  border-radius: 7px;
+  color: #4a4852;
   text-decoration: none;
+  font-size: 14px;
 }
 
-.link:hover {
-  text-decoration: underline;
+.originalLink:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
 }
 
 @media (max-width: 560px) {

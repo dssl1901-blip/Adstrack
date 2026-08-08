@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import { enqueue } from './mediaQueue';
 
-export default function AdPreview({ ad }) {
+export default function AdPreview({ ad, onLoaded }) {
   const [media, setMedia] = useState(null);
   const [status, setStatus] = useState('loading');
 
@@ -22,6 +22,7 @@ export default function AdPreview({ ad }) {
         if (data.image || data.video) {
           setMedia(data);
           setStatus('ready');
+          if (onLoaded) onLoaded(ad.id, data);
         } else {
           setStatus('fallback');
         }

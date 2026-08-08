@@ -4,6 +4,7 @@ import { useState } from 'react';
 import styles from './page.module.css';
 import FilterBar from './FilterBar';
 import AdPreview from './AdPreview';
+import AdDetailPanel from './AdDetailPanel';
 
 const DEFAULT_COUNTRIES = ['FR', 'DE', 'ES', 'IT', 'BE', 'NL', 'PT', 'PL', 'SE', 'IE'];
 
@@ -92,6 +93,12 @@ export default function Ads() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
+  const [mediaCache, setMediaCache] = useState({});
+  const [selectedAd, setSelectedAd] = useState(null);
+
+  function handleMediaLoaded(adId, media) {
+    setMediaCache((prev) => ({ ...prev, [adId]: media }));
+  }
 
   async function handleSearch(e) {
     e.preventDefault();
@@ -234,15 +241,14 @@ export default function Ads() {
 
       <ul className={styles.results}>
         {results.map((ad, i) => {
-          const spend = spendMidpoint(ad.spend);
           const live = daysLive(ad.ad_delivery_start_time);
           return (
             <li key={ad.id || i} className={styles.card}>
-              <AdPreview ad={ad} />
+              <AdPreview ad={ad} onLoaded={handleMediaLoaded} />
               <div className={styles.cardBody}>
                 <div className={styles.cardTop}>
                   <span className={styles.pageName}>{ad.page_name || 'Annonceur inconnu'}</span>
-                  {live !== null && <span className={styles.liveBadge}>{live} j en diffusion</span>}
+                  {live !== null && <span className={styles.liveBadge}>{live} j</span>}
                 </div>
 
                 <p className={styles.adText}>
@@ -250,29 +256,38 @@ export default function Ads() {
                     'Pas de texte disponible pour cette annonce.'}
                 </p>
 
-                <div className={styles.cardFoot}>
-                  <span className={styles.metric}>
-                    Spend&nbsp;:{' '}
-                    <strong>
-                      {ad.spend
-                        ? `${ad.spend.lower_bound}–${ad.spend.upper_bound} ${ad.currency || 'EUR'}`
-                        : 'n/a'}
-                    </strong>
-                  </span>
-                  <span className={styles.metric}>
-                    Impressions&nbsp;:{' '}
-                    <strong>
-                      {ad.impressions
-                        ? `${ad.impressions.lower_bound}–${ad.impressions.upper_bound}`
-                        : 'n/a'}
-                    </strong>
-                  </span>
+                <div className={styles.cardActions}>
+                  <button className={styles.detailsBtn} onClick={() => setSelectedAd(ad)}>
+                    Détails
+                  </button>
+                  {ad.ad_snapshot_url && (
+                    <a
+                      className={styles.originalLink}
+                      href={ad.ad_snapshot_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      title="Voir la pub originale sur Meta Ad Library"
+                    >
+                      ↗
+                    </a>
+                  )}
                 </div>
               </div>
             </li>
           );
         })}
       </ul>
+
+      <AdDetailPanel
+        ad={selectedAd}
+        media={selectedAd ? mediaCache[selectedAd.id] : null}
+        activeCount={
+          selectedAd
+            ? results.filter((r) => r.page_name === selectedAd.page_name).length
+            : 0
+        }
+        onClose={() => setSelectedAd(null)}
+      />
     </main>
   );
 }
