@@ -121,7 +121,11 @@ export async function GET(request) {
 
     const result = { video, image };
     if (cache) {
-      cache.set(cacheKey, result, { ex: CACHE_TTL_SECONDS }).catch(() => {});
+      try {
+        await cache.set(cacheKey, result, { ex: CACHE_TTL_SECONDS });
+      } catch {
+        // écriture cache échouée, on renvoie quand même le résultat
+      }
     }
 
     return NextResponse.json(result);
