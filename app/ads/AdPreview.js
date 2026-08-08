@@ -1,14 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './page.module.css';
 import { enqueue } from './mediaQueue';
 
 export default function AdPreview({ ad, onLoaded }) {
   const [media, setMedia] = useState(null);
-  const [status, setStatus] = useState('loading');
+  const [status, setStatus] = useState('idle');
+  const rootRef = useRef(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (!rootRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(rootRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
     if (!ad.id) {
       setStatus('empty');
       return;
@@ -34,12 +52,14 @@ export default function AdPreview({ ad, onLoaded }) {
     return () => {
       cancelled = true;
     };
-  }, [ad.id]);
+  }, [visible, ad.id]);
 
   if (status === 'empty') return null;
 
-  if (status === 'loading') {
-    return <div className={`${styles.previewWrap} ${styles.previewLoading}`} aria-hidden="true" />;
+  if (status === 'idle' || status === 'loading') {
+    return (
+      <div ref={rootRef} className={`${styles.previewWrap} ${styles.previewLoading}`} aria-hidden="true" />
+    );
   }
 
   if (status === 'ready' && media) {

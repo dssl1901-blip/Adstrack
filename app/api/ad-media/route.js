@@ -1,4 +1,15 @@
 import { NextResponse } from 'next/server';
+import { Redis } from '@upstash/redis';
+
+const CACHE_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 jours — le visuel d'une pub ne change pas
+
+let redis = null;
+function getRedis() {
+  if (redis) return redis;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null;
+  redis = Redis.fromEnv();
+  return redis;
+}
 
 function decodeEntities(str) {
   return str
@@ -50,6 +61,20 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Paramètre "id" invalide' }, { status: 400 });
   }
 
+  const cacheKey = `ad-media:${adId}`;
+  const cache = getRedis();
+
+  if (cache) {
+    try {
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        return NextResponse.json({ ...cached, cached: true });
+      }
+    } catch {
+      // cache indisponible, on continue sans bloquer la requête
+    }
+  }
+
   const apiKey = process.env.SCRAPINGBEE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -94,7 +119,12 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Aucun média détecté sur cette pub' }, { status: 404 });
     }
 
-    return NextResponse.json({ video, image });
+    const result = { video, image };
+    if (cache) {
+      cache.set(cacheKey, result, { ex: CACHE_TTL_SECONDS }).catch(() => {});
+    }
+
+    return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(
       { error: `Impossible de contacter ScrapingBee : ${err.message || 'erreur inconnue'}` },
