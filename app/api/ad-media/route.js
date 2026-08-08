@@ -34,9 +34,12 @@ function extractVideoSrc(html) {
 }
 
 function extractLargeImage(html) {
-  const matches = [...html.matchAll(/<img[^>]+src=["']([^"']*scontent[^"']+)["']/gi)];
-  if (matches.length) return decodeEntities(matches[0][1]);
-  return null;
+  const matches = [...html.matchAll(/<img[^>]+src=["']([^"']*scontent[^"']+)["']/gi)].map((m) => m[1]);
+  const filtered = matches.filter(
+    (url) => !/s(32|40|48|60|64|100)x(32|40|48|60|64|100)/i.test(url)
+  );
+  const chosen = filtered[0] || matches[0];
+  return chosen ? decodeEntities(chosen) : null;
 }
 
 export async function GET(request) {

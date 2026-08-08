@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './page.module.css';
+import { enqueue } from './mediaQueue';
 
 export default function AdPreview({ ad }) {
   const [media, setMedia] = useState(null);
@@ -15,8 +16,7 @@ export default function AdPreview({ ad }) {
     let cancelled = false;
     setStatus('loading');
 
-    fetch(`/api/ad-media?url=${encodeURIComponent(ad.ad_snapshot_url)}`)
-      .then((res) => res.json())
+    enqueue(() => fetch(`/api/ad-media?url=${encodeURIComponent(ad.ad_snapshot_url)}`).then((res) => res.json()))
       .then((data) => {
         if (cancelled) return;
         if (data.image || data.video) {
