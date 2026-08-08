@@ -71,7 +71,15 @@ export async function GET(request) {
       );
     }
 
-    return NextResponse.json({ results: data.data || [] });
+    const cleaned = (data.data || []).map((ad) => {
+      const { ad_snapshot_url, ...rest } = ad;
+      return {
+        ...rest,
+        meta_public_url: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}` : null,
+      };
+    });
+
+    return NextResponse.json({ results: cleaned });
   } catch (err) {
     return NextResponse.json({ error: 'Impossible de contacter Meta' }, { status: 502 });
   }

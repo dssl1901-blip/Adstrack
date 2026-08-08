@@ -260,10 +260,10 @@ export default function Ads() {
                   <button className={styles.detailsBtn} onClick={() => setSelectedAd(ad)}>
                     Détails
                   </button>
-                  {ad.ad_snapshot_url && (
+                  {ad.meta_public_url && (
                     <a
                       className={styles.originalLink}
-                      href={ad.ad_snapshot_url}
+                      href={ad.meta_public_url}
                       target="_blank"
                       rel="noreferrer"
                       title="Voir la pub originale sur Meta Ad Library"

@@ -91,8 +91,8 @@ export default function AdDetailPanel({ ad, media, activeCount, onClose }) {
 
             <dt>Publicité originale</dt>
             <dd>
-              {ad.ad_snapshot_url ? (
-                <a href={ad.ad_snapshot_url} target="_blank" rel="noreferrer" className={styles.link}>
+              {ad.meta_public_url ? (
+                <a href={ad.meta_public_url} target="_blank" rel="noreferrer" className={styles.link}>
                   Ouvrir dans Facebook ↗
                 </a>
               ) : (

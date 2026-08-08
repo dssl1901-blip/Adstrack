@@ -44,10 +44,10 @@ function extractLargeImage(html) {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const snapshotUrl = searchParams.get('url');
+  const adId = searchParams.get('id');
 
-  if (!snapshotUrl || !snapshotUrl.startsWith('https://www.facebook.com/')) {
-    return NextResponse.json({ error: 'URL de snapshot invalide' }, { status: 400 });
+  if (!adId || !/^\d+$/.test(adId)) {
+    return NextResponse.json({ error: 'Paramètre "id" invalide' }, { status: 400 });
   }
 
   const apiKey = process.env.SCRAPINGBEE_API_KEY;
@@ -57,6 +57,16 @@ export async function GET(request) {
       { status: 500 }
     );
   }
+
+  const metaToken = process.env.META_ACCESS_TOKEN;
+  if (!metaToken) {
+    return NextResponse.json(
+      { error: 'META_ACCESS_TOKEN manquant côté serveur' },
+      { status: 500 }
+    );
+  }
+
+  const snapshotUrl = `https://www.facebook.com/ads/archive/render_ad/?id=${adId}&access_token=${metaToken}`;
 
   const scrapeUrl = new URL('https://app.scrapingbee.com/api/v1/');
   scrapeUrl.searchParams.set('api_key', apiKey);
