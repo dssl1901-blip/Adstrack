@@ -1,22 +1,42 @@
 import { NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
 
-export const runtime = 'nodejs';
-export const maxDuration = 60;
+function decodeEntities(str) {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
 
-let browserPromise = null;
+function extractMeta(html, property) {
+  const re1 = new RegExp(
+    `<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["']`,
+    'i'
+  );
+  let match = html.match(re1);
+  if (match) return decodeEntities(match[1]);
 
-async function getBrowser() {
-  if (!browserPromise) {
-    browserPromise = puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: { width: 800, height: 1000 },
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-    });
-  }
-  return browserPromise;
+  const re2 = new RegExp(
+    `<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${property}["']`,
+    'i'
+  );
+  match = html.match(re2);
+  return match ? decodeEntities(match[1]) : null;
+}
+
+function extractVideoSrc(html) {
+  let match = html.match(/<video[^>]+src=["']([^"']+)["']/i);
+  if (match) return decodeEntities(match[1]);
+
+  match = html.match(/<video[^>]*>[\s\S]*?<source[^>]+src=["']([^"']+)["']/i);
+  return match ? decodeEntities(match[1]) : null;
+}
+
+function extractLargeImage(html) {
+  const matches = [...html.matchAll(/<img[^>]+src=["']([^"']*scontent[^"']+)["']/gi)];
+  if (matches.length) return decodeEntities(matches[0][1]);
+  return null;
 }
 
 export async function GET(request) {
@@ -27,50 +47,44 @@ export async function GET(request) {
     return NextResponse.json({ error: 'URL de snapshot invalide' }, { status: 400 });
   }
 
-  let page;
-  try {
-    const browser = await getBrowser();
-    page = await browser.newPage();
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+  const apiKey = process.env.SCRAPINGBEE_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'SCRAPINGBEE_API_KEY manquant côté serveur' },
+      { status: 500 }
     );
+  }
 
-    await page.goto(snapshotUrl, { waitUntil: 'networkidle2', timeout: 25000 });
+  const scrapeUrl = new URL('https://app.scrapingbee.com/api/v1/');
+  scrapeUrl.searchParams.set('api_key', apiKey);
+  scrapeUrl.searchParams.set('url', snapshotUrl);
+  scrapeUrl.searchParams.set('render_js', 'true');
+  scrapeUrl.searchParams.set('wait', '3000');
 
-    await page
-      .waitForSelector('video, img[src*="scontent"]', { timeout: 8000 })
-      .catch(() => {});
+  try {
+    const res = await fetch(scrapeUrl.toString());
 
-    const media = await page.evaluate(() => {
-      const video = document.querySelector('video');
-      if (video && video.src) {
-        return { type: 'video', url: video.src, poster: video.poster || null };
-      }
+    if (!res.ok) {
+      const errText = await res.text();
+      return NextResponse.json(
+        { error: `ScrapingBee a échoué (${res.status}) : ${errText.slice(0, 200)}` },
+        { status: 502 }
+      );
+    }
 
-      const imgs = Array.from(document.querySelectorAll('img'))
-        .filter((img) => img.src && img.naturalWidth > 120 && img.naturalHeight > 120)
-        .sort((a, b) => b.naturalWidth * b.naturalHeight - a.naturalWidth * a.naturalHeight);
+    const html = await res.text();
 
-      if (imgs.length) {
-        return { type: 'image', url: imgs[0].src };
-      }
-      return null;
-    });
+    const video = extractVideoSrc(html) || extractMeta(html, 'og:video:secure_url') || extractMeta(html, 'og:video');
+    const image = extractLargeImage(html) || extractMeta(html, 'og:image');
 
-    await page.close();
-
-    if (!media) {
+    if (!video && !image) {
       return NextResponse.json({ error: 'Aucun média détecté sur cette pub' }, { status: 404 });
     }
 
-    if (media.type === 'video') {
-      return NextResponse.json({ video: media.url, image: media.poster });
-    }
-    return NextResponse.json({ image: media.url });
+    return NextResponse.json({ video, image });
   } catch (err) {
-    if (page) await page.close().catch(() => {});
     return NextResponse.json(
-      { error: `Rendu échoué : ${err.message || 'erreur inconnue'}` },
+      { error: `Impossible de contacter ScrapingBee : ${err.message || 'erreur inconnue'}` },
       { status: 502 }
     );
   }
